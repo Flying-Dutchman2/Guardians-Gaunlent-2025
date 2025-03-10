@@ -1,6 +1,3 @@
-
-I understand the issue. Let me create a single, properly-formatted Markdown document where all titles are properly formatted as Markdown headers (not in code blocks), and all commands are in proper code blocks. This will make it easy to copy and paste the entire document into GitHub.
-
 # RCC-K Guardians Gauntlet CTF - Complete Deployment Guide
 
 This comprehensive guide will walk you through setting up the complete RCC-K Guardians Gauntlet CTF environment from scratch, including hardware configuration, virtualization setup, and all components of the CTF.
@@ -1676,6 +1673,3 @@ sudo netstat -tulpn           # Check listening ports
      - ~/rcc-k/ctfd/docker-compose.yml
      - ~/rcc-k/story-portal/docker-compose.yml
 
----
-
-This comprehensive deployment guide provides step-by-step instructions for setting up the complete RCC-K Guardians Gauntlet CTF environment, from hardware configuration to running the event. By following these instructions carefully, administrators with minimal technical background can successfully deploy and manage the CTF environment.
