@@ -1,125 +1,163 @@
-markdownCopy# RCC-K Guardians Gauntlet CTF - Complete Deployment Guide
-
+I understand the issue. Let me create a single, properly-formatted Markdown document where all titles are properly formatted as Markdown headers (not in code blocks), and all commands are in proper code blocks. This will make it easy to copy and paste the entire document into GitHub.
+RCC-K Guardians Gauntlet CTF - Complete Deployment Guide
 This comprehensive guide will walk you through setting up the complete RCC-K Guardians Gauntlet CTF environment from scratch, including hardware configuration, virtualization setup, and all components of the CTF.
+Table of Contents
 
-## Table of Contents
-1. [Hardware Setup](#hardware-setup)
-2. [ESXi Installation and Configuration](#esxi-installation-and-configuration)
-3. [Virtual Machine Setup](#virtual-machine-setup)
-4. [Network Configuration](#network-configuration)
-5. [Ubuntu Server Installation](#ubuntu-server-installation)
-6. [Base System Configuration](#base-system-configuration)
-7. [Docker Installation](#docker-installation)
-8. [CTF Environment Deployment](#ctf-environment-deployment)
-9. [Challenge Containers Setup](#challenge-containers-setup)
-10. [CTFd Platform Configuration](#ctfd-platform-configuration)
-11. [Participant Environment](#participant-environment)
-12. [Testing the Environment](#testing-the-environment)
-13. [Running the Event](#running-the-event)
-14. [Troubleshooting Guide](#troubleshooting-guide)
-15. [Administrator Quick Reference](#administrator-quick-reference)
+Hardware Setup
+ESXi Installation and Configuration
+Virtual Machine Setup
+Network Configuration
+Ubuntu Server Installation
+Base System Configuration
+Docker Installation
+CTF Environment Deployment
+Challenge Containers Setup
+CTFd Platform Configuration
+Participant Environment
+Testing the Environment
+Running the Event
+Troubleshooting Guide
+Administrator Quick Reference
 
-## Hardware Setup
+Hardware Setup
+Required Hardware
 
-### Required Hardware
-- Dell Server with sufficient resources (recommended specs):
-  - CPU: 8+ cores
-  - RAM: 32GB+ 
-  - Storage: 500GB+
-  - Network: 2 NICs minimum
-- Network switch (8+ port gigabit)
-- Ethernet cables (Cat5e or better)
-- USB flash drive (8GB+) for ESXi installation
-- Laptop for accessing ESXi and managing the environment
+Dell Server with sufficient resources (recommended specs):
 
-### Physical Setup
-1. **Rack or place the Dell server** in a secure location with proper power and cooling
-2. **Connect the server to power** and to your network switch
-3. **Connect network ports**:
-   - NIC 1: Management network (will be used for ESXi management)
-   - NIC 2: CTF network (will be isolated for the CTF environment)
-4. **Connect the network switch** to power
-5. **Prepare admin workstation** (laptop with network access to the server)
+CPU: 8+ cores
+RAM: 32GB+
+Storage: 500GB+
+Network: 2 NICs minimum
 
-## ESXi Installation and Configuration
 
-### Prepare ESXi Installation Media
-1. **Download ESXi 8.0** from [VMware website](https://customerconnect.vmware.com/downloads/details?downloadGroup=ESXI80U1A&productId=1345&rPId=101390)
-2. **Create bootable USB**:
-   - Using [Rufus](https://rufus.ie/en/) (on Windows)
-   - Or `dd` command (on Linux/macOS): `sudo dd if=VMware-VMvisor-Installer.iso of=/dev/sdX bs=1M status=progress`
+Network switch (8+ port gigabit)
+Ethernet cables (Cat5e or better)
+USB flash drive (8GB+) for ESXi installation
+Laptop for accessing ESXi and managing the environment
 
-### Install ESXi
-1. **Insert USB drive** into the Dell server
-2. **Boot from USB**:
-   - Power on the server
-   - Press F11 (or appropriate key) during startup to access boot menu
-   - Select USB drive
+Physical Setup
 
-3. **Follow ESXi installation prompts**:
-   - Accept license agreement
-   - Select destination disk (usually the primary drive)
-   - Set root password (document this securely!)
-   - Confirm installation (this will erase the destination disk)
+Rack or place the Dell server in a secure location with proper power and cooling
+Connect the server to power and to your network switch
+Connect network ports:
 
-4. **Complete installation**:
-   - Remove USB drive when prompted
-   - Server will reboot
+NIC 1: Management network (will be used for ESXi management)
+NIC 2: CTF network (will be isolated for the CTF environment)
 
-### Initial ESXi Configuration
-1. **Note the management IP** displayed on the ESXi DCUI (Direct Console User Interface)
-2. **Access ESXi web interface** from your admin laptop browser: `https://<management-ip>`
-3. **Login** with root and the password you set during installation
-4. **Configure networking**:
-   - Navigate to Networking > Virtual Switches
-   - Ensure you have:
-     - vSwitch0 (connected to your management NIC)
-     - Create vSwitch1 (connected to NIC 2 for the CTF network)
-   - Create port groups:
-     - Management Network (on vSwitch0)
-     - CTF Network (on vSwitch1)
 
-5. **Configure time settings**:
-   - Navigate to Host > Manage > System > Time & Date
-   - Set correct time zone and NTP servers
+Connect the network switch to power
+Prepare admin workstation (laptop with network access to the server)
 
-## Virtual Machine Setup
+ESXi Installation and Configuration
+Prepare ESXi Installation Media
 
-### Create Ubuntu Server VM
-1. **Download Ubuntu Server 22.04 LTS ISO** from [Ubuntu website](https://ubuntu.com/download/server)
-2. **Upload ISO to ESXi**:
-   - Navigate to Storage > Datastore Browser
-   - Create a new folder named "ISOs"
-   - Upload the Ubuntu ISO
+Download ESXi 8.0 from VMware website
+Create bootable USB:
 
-3. **Create virtual machine**:
-   - Click "Create/Register VM"
-   - Select "Create a new virtual machine" > Next
-   - Name: "RCC-K-CTF-Server"
-   - Compatibility: ESXi 8.0
-   - Guest OS Family: Linux
-   - Guest OS Version: Ubuntu Linux (64-bit)
-   - Click Next
+Using Rufus (on Windows)
+Or dd command (on Linux/macOS):
 
-4. **Select storage**:
-   - Select the datastore with most free space
-   - Click Next
+bashCopysudo dd if=VMware-VMvisor-Installer.iso of=/dev/sdX bs=1M status=progress
 
-5. **Customize settings**:
-   - CPU: 4 vCPUs
-   - Memory: 8GB
-   - Hard disk: 100GB
-   - CD/DVD Drive: Select the Ubuntu ISO
-   - Network Adapter 1: Management Network
-   - Network Adapter 2: CTF Network
-   - Click Next
 
-6. **Review settings** and click Finish
+Install ESXi
 
-## Network Configuration
+Insert USB drive into the Dell server
+Boot from USB:
 
-### Network Architecture Overview
-┌────────────────────────────────────────────────┐
+Power on the server
+Press F11 (or appropriate key) during startup to access boot menu
+Select USB drive
+
+
+Follow ESXi installation prompts:
+
+Accept license agreement
+Select destination disk (usually the primary drive)
+Set root password (document this securely!)
+Confirm installation (this will erase the destination disk)
+
+
+Complete installation:
+
+Remove USB drive when prompted
+Server will reboot
+
+
+
+Initial ESXi Configuration
+
+Note the management IP displayed on the ESXi DCUI (Direct Console User Interface)
+Access ESXi web interface from your admin laptop browser: https://<management-ip>
+Login with root and the password you set during installation
+Configure networking:
+
+Navigate to Networking > Virtual Switches
+Ensure you have:
+
+vSwitch0 (connected to your management NIC)
+Create vSwitch1 (connected to NIC 2 for the CTF network)
+
+
+Create port groups:
+
+Management Network (on vSwitch0)
+CTF Network (on vSwitch1)
+
+
+
+
+Configure time settings:
+
+Navigate to Host > Manage > System > Time & Date
+Set correct time zone and NTP servers
+
+
+
+Virtual Machine Setup
+Create Ubuntu Server VM
+
+Download Ubuntu Server 22.04 LTS ISO from Ubuntu website
+Upload ISO to ESXi:
+
+Navigate to Storage > Datastore Browser
+Create a new folder named "ISOs"
+Upload the Ubuntu ISO
+
+
+Create virtual machine:
+
+Click "Create/Register VM"
+Select "Create a new virtual machine" > Next
+Name: "RCC-K-CTF-Server"
+Compatibility: ESXi 8.0
+Guest OS Family: Linux
+Guest OS Version: Ubuntu Linux (64-bit)
+Click Next
+
+
+Select storage:
+
+Select the datastore with most free space
+Click Next
+
+
+Customize settings:
+
+CPU: 4 vCPUs
+Memory: 8GB
+Hard disk: 100GB
+CD/DVD Drive: Select the Ubuntu ISO
+Network Adapter 1: Management Network
+Network Adapter 2: CTF Network
+Click Next
+
+
+Review settings and click Finish
+
+Network Configuration
+Network Architecture Overview
+Copy┌────────────────────────────────────────────────┐
 │                 Dell Server                    │
 │ ┌──────────────────────────────────────────┐   │
 │ │               ESXi 8.0                   │   │
@@ -131,65 +169,80 @@ This comprehensive guide will walk you through setting up the complete RCC-K Gua
 │ │                                          │   │
 │ └──────────────────────────────────────────┘   │
 └────────────────────────────────────────────────┘
-│                      │
-│                      │
-▼                      ▼
-┌───────────────┐      ┌───────────────┐
-│  Management   │      │  CTF Network  │
-│    Network    │      │   Switch      │
-└───────────────┘      └───────────────┘
-│                      │
-▼                      │
-┌───────────────┐              │
-│    Admin      │              │
-│   Laptop      │              │
-└───────────────┘              ▼
-┌───────────────┐
-│  Participant  │
-│   Laptops     │
-└───────────────┘
-Copy
-### IP Scheme
-- **Management Network**:
-  - Subnet: 10.0.0.0/24
-  - ESXi Host: 10.0.0.10
-  - Ubuntu VM (eth0): 10.0.0.20
-  - Admin Laptop: DHCP (10.0.0.100-200)
+          │                      │
+          │                      │
+          ▼                      ▼
+  ┌───────────────┐      ┌───────────────┐
+  │  Management   │      │  CTF Network  │
+  │    Network    │      │   Switch      │
+  └───────────────┘      └───────────────┘
+          │                      │
+          ▼                      │
+  ┌───────────────┐              │
+  │    Admin      │              │
+  │   Laptop      │              │
+  └───────────────┘              ▼
+                         ┌───────────────┐
+                         │  Participant  │
+                         │   Laptops     │
+                         └───────────────┘
+IP Scheme
 
-- **CTF Network**:
-  - Subnet: 192.168.1.0/24
-  - Ubuntu VM (eth1): 192.168.1.134
-  - Participant Laptops: DHCP (192.168.1.100-150)
+Management Network:
 
-- **Docker Containers**:
-  - Subnet: 172.18.0.0/16
-  - Container IPs: 172.18.0.2-15
+Subnet: 10.0.0.0/24
+ESXi Host: 10.0.0.10
+Ubuntu VM (eth0): 10.0.0.20
+Admin Laptop: DHCP (10.0.0.100-200)
 
-## Ubuntu Server Installation
 
-### Install Ubuntu Server
-1. **Power on** the Ubuntu VM from ESXi interface
-2. **Follow installation prompts**:
-   - Select language: English
-   - Keyboard configuration: US
-   - Network connections:
-     - eth0 (Management): DHCP
-     - eth1 (CTF): Static IP (192.168.1.134/24)
-   - Storage configuration: Use entire disk, set up as LVM
-   - Profile setup:
-     - Name: CTF Admin
-     - Server name: ctf
-     - Username: ctfadmin
-     - Password: (create a secure password and document it)
-   - SSH Setup: Install OpenSSH server
-   - Featured Server Snaps: None
+CTF Network:
 
-3. **Complete installation** and reboot
+Subnet: 192.168.1.0/24
+Ubuntu VM (eth1): 192.168.1.134
+Participant Laptops: DHCP (192.168.1.100-150)
 
-### Access Ubuntu Server
-1. **Connect via SSH** from your admin laptop:
-   ```bash
-   ssh ctfadmin@10.0.0.20
+
+Docker Containers:
+
+Subnet: 172.18.0.0/16
+Container IPs: 172.18.0.2-15
+
+
+
+Ubuntu Server Installation
+Install Ubuntu Server
+
+Power on the Ubuntu VM from ESXi interface
+Follow installation prompts:
+
+Select language: English
+Keyboard configuration: US
+Network connections:
+
+eth0 (Management): DHCP
+eth1 (CTF): Static IP (192.168.1.134/24)
+
+
+Storage configuration: Use entire disk, set up as LVM
+Profile setup:
+
+Name: CTF Admin
+Server name: ctf
+Username: ctfadmin
+Password: (create a secure password and document it)
+
+
+SSH Setup: Install OpenSSH server
+Featured Server Snaps: None
+
+
+Complete installation and reboot
+
+Access Ubuntu Server
+
+Connect via SSH from your admin laptop:
+bashCopyssh ctfadmin@10.0.0.20
 
 Update the system:
 bashCopysudo apt update && sudo apt upgrade -y
@@ -236,8 +289,9 @@ Configure SSH
 bashCopysudo nano /etc/ssh/sshd_config
 
 Ensure PasswordAuthentication yes is set
-Restart SSH: sudo systemctl restart sshd
+Restart SSH:
 
+bashCopysudo systemctl restart sshd
 Docker Installation
 Install Docker Engine
 bashCopy# Add Docker's official GPG key
@@ -288,7 +342,6 @@ docker network create --subnet=172.19.0.0/16 --internal secret-network
 Deploy CTFd Platform
 
 Create docker-compose.yml:
-
 bashCopycat > ~/rcc-k/ctfd/docker-compose.yml << 'EOF'
 version: '3'
 
@@ -313,25 +366,23 @@ networks:
 EOF
 
 Start CTFd platform:
-
 bashCopycd ~/rcc-k/ctfd
 mkdir -p data
 docker-compose up -d
+
+
 Deploy Story Portal
 
 Create directory structure:
-
 bashCopymkdir -p ~/rcc-k/story-portal/content
 
 Create Dockerfile:
-
 bashCopycat > ~/rcc-k/story-portal/Dockerfile << 'EOF'
 FROM nginx:alpine
 COPY content /usr/share/nginx/html
 EOF
 
 Create docker-compose.yml:
-
 bashCopycat > ~/rcc-k/story-portal/docker-compose.yml << 'EOF'
 version: '3'
 
@@ -352,7 +403,6 @@ networks:
 EOF
 
 Create index.html:
-
 bashCopycat > ~/rcc-k/story-portal/content/index.html << 'EOF'
 <!DOCTYPE html>
 <html>
@@ -417,14 +467,14 @@ bashCopycat > ~/rcc-k/story-portal/content/index.html << 'EOF'
 EOF
 
 Start the story portal:
-
 bashCopycd ~/rcc-k/story-portal
 docker-compose up -d
+
+
 Challenge Containers Setup
 Prepare Challenge Containers
 
 Create the docker-compose.yml for challenges:
-
 bashCopycat > ~/rcc-k/challenges/docker-compose.yml << 'EOF'
 version: '3'
 
@@ -602,16 +652,16 @@ networks:
   rcc-k-net:
     external: true
 EOF
+
+
 Create Challenge Content Files
 
 Create SMB file directories:
-
 bashCopymkdir -p ~/rcc-k/challenges/samba-data/public
 mkdir -p ~/rcc-k/challenges/samba-data/private
 mkdir -p ~/rcc-k/challenges/samba-data/restricted
 
 Create SMB public share files:
-
 bashCopycat > ~/rcc-k/challenges/samba-data/public/welcome.txt << 'EOF'
 Welcome to the RCC-K File Server
 
@@ -638,7 +688,6 @@ FLAG{public_share_accessed}
 EOF
 
 Create SMB private share files:
-
 bashCopycat > ~/rcc-k/challenges/samba-data/private/backup.sql << 'EOF'
 -- Database backup 2023-11-15
 -- WARNING: This file contains sensitive information
@@ -668,7 +717,6 @@ Emergency Override: FLAG{private_share_accessed}
 EOF
 
 Create SMB restricted share files:
-
 bashCopycat > ~/rcc-k/challenges/samba-data/restricted/admin_notes.txt << 'EOF'
 ADMIN ONLY - DO NOT SHARE
 
@@ -681,7 +729,6 @@ FLAG{restricted_share_accessed}
 EOF
 
 Create cryptography challenge files:
-
 bashCopymkdir -p ~/rcc-k/challenges/crypto-data/html
 
 cat > ~/rcc-k/challenges/crypto-data/html/index.html << 'EOF'
@@ -750,9 +797,7 @@ cat > ~/rcc-k/challenges/crypto-data/html/index.html << 'EOF'
 </body>
 </html>
 EOF
-
 Create hidden service files:
-
 bashCopymkdir -p ~/rcc-k/challenges/hidden-data
 
 cat > ~/rcc-k/challenges/hidden-data/index.html << 'EOF'
@@ -766,25 +811,8 @@ cat > ~/rcc-k/challenges/hidden-data/index.html << 'EOF'
         .secret:hover { color: red; }
     </style>
 </head>
-<body>
-    <h1>RCC-K Hidden Service</h1>
-    <p>Congratulations on discovering this hidden service!</p>
-    <p>FLAG{hidden_service_discovered}</p>
-    
-    <h2>Internal Notes</h2>
-    <p>The secure communication channel is at 192.168.1.134:5000/api/status</p>
-    
-    <div class="secret">
-        Emergency access code: 7355608
-    </div>
-</body>
-</html>
-EOF
-
-Here's the continuation of the document:
-markdownCopy7. **Create admin portal files**:
-```bash
-mkdir -p ~/rcc-k/challenges/admin-portal-data
+Create admin portal files:
+bashCopymkdir -p ~/rcc-k/challenges/admin-portal-data
 
 cat > ~/rcc-k/challenges/admin-portal-data/index.html << 'EOF'
 <!DOCTYPE html>
@@ -861,7 +889,6 @@ cat > ~/rcc-k/challenges/admin-portal-data/admin.html << 'EOF'
 EOF
 
 Create vulnerable webapp files:
-
 bashCopymkdir -p ~/rcc-k/challenges/webapp-data
 
 cat > ~/rcc-k/challenges/webapp-data/index.html << 'EOF'
@@ -941,7 +968,6 @@ cat > ~/rcc-k/challenges/webapp-data/admin.php << 'EOF'
 EOF
 
 Create API server files:
-
 bashCopymkdir -p ~/rcc-k/challenges/api-data
 
 cat > ~/rcc-k/challenges/api-data/api.py << 'EOF'
@@ -996,21 +1022,19 @@ if __name__ == '__main__':
 EOF
 
 Start the challenge containers:
-
 bashCopycd ~/rcc-k/challenges
 docker-compose up -d
+
+
 Configure DHCP for Participant Network
 
 Install DHCP server:
-
 bashCopysudo apt install -y isc-dhcp-server
 
 Configure DHCP server:
-
 bashCopysudo nano /etc/dhcp/dhcpd.conf
 
 Add the following configuration:
-
 Copydefault-lease-time 600;
 max-lease-time 7200;
 option subnet-mask 255.255.255.0;
@@ -1023,17 +1047,16 @@ subnet 192.168.1.0 netmask 255.255.255.0 {
 }
 
 Set the DHCP server interface:
-
 bashCopysudo nano /etc/default/isc-dhcp-server
 
 Edit the file to set the interface:
-
 CopyINTERFACESv4="ens192"  # Use the actual interface name for the CTF network
 
 Start the DHCP server:
-
 bashCopysudo systemctl enable isc-dhcp-server
 sudo systemctl restart isc-dhcp-server
+
+
 CTFd Platform Configuration
 
 Access CTFd web interface at http://192.168.1.134:8000
@@ -1100,7 +1123,6 @@ Save changes
 Create Environment Reset Script
 
 Create the reset script:
-
 bashCopycat > ~/rcc-k/reset.sh << 'EOF'
 #!/bin/bash
 echo "Resetting RCC-K Guardians Gauntlet environment..."
@@ -1206,6 +1228,8 @@ echo "Environment reset complete! Ready for next session."
 EOF
 
 chmod +x ~/rcc-k/reset.sh
+
+
 Participant Environment
 Preparing Participant Laptops
 
@@ -1245,7 +1269,6 @@ Firefox (web browser)
 Participant Guide
 
 Create a participant guide document:
-
 bashCopycat > ~/rcc-k/participant-guide.md << 'EOF'
 # RCC-K Guardians Gauntlet - Participant Guide
 
@@ -1294,7 +1317,6 @@ Testing the Environment
 Verification Checklist
 
 Network connectivity:
-
 bashCopy# Test that Docker network is correctly set up
 docker network inspect rcc-k-net
 
@@ -1306,14 +1328,12 @@ curl http://192.168.1.134:8000  # CTFd
 curl http://192.168.1.134:80    # Story portal
 
 Container status:
-
 bashCopy# Verify all containers are running
 docker-compose -f ~/rcc-k/challenges/docker-compose.yml ps
 docker-compose -f ~/rcc-k/ctfd/docker-compose.yml ps
 docker-compose -f ~/rcc-k/story-portal/docker-compose.yml ps
 
 Service accessibility:
-
 bashCopy# SSH connections
 ssh -p 2201 guardian@192.168.1.134    # Operations server
 ssh -p 2202 employee@192.168.1.134    # Employee workstation
@@ -1329,12 +1349,13 @@ curl http://192.168.1.134:8888     # Hidden service
 curl http://192.168.1.134:5000     # API server
 
 DHCP service:
-
 bashCopy# Verify DHCP server is running
 sudo systemctl status isc-dhcp-server
 
 # Check DHCP configuration
 cat /etc/dhcp/dhcpd.conf
+
+
 Full CTF Walkthrough
 
 Connect a test laptop to the network and verify:
@@ -1345,12 +1366,13 @@ It can complete at least one challenge from each category
 
 
 Test the reset script:
-
 bashCopy# Run the reset script
 ~/rcc-k/reset.sh
 
 # Verify that services are restarted and working
 curl http://192.168.1.134:8000
+
+
 Running the Event
 Pre-Event Checklist
 
@@ -1410,7 +1432,6 @@ Collect feedback for future events
 Between Sessions
 
 Reset the environment:
-
 bashCopy~/rcc-k/reset.sh
 
 Verify the reset was successful:
@@ -1426,7 +1447,6 @@ Common Issues and Solutions
 Container Issues
 
 Container not starting:
-
 bashCopy# Check container logs
 docker logs [container_name]
 
@@ -1438,7 +1458,6 @@ cd ~/rcc-k/challenges
 docker-compose up -d [service_name]
 
 Container networking issues:
-
 bashCopy# Check network configuration
 docker network inspect rcc-k-net
 
@@ -1448,10 +1467,11 @@ docker network create --subnet=172.18.0.0/16 rcc-k-net
 cd ~/rcc-k/challenges
 docker-compose down
 docker-compose up -d
+
+
 DHCP Issues
 
 Participants not getting IP addresses:
-
 bashCopy# Check DHCP server status
 sudo systemctl status isc-dhcp-server
 
@@ -1462,16 +1482,16 @@ sudo journalctl -u isc-dhcp-server
 sudo systemctl restart isc-dhcp-server
 
 Wrong IP range assigned:
-
 bashCopy# Verify DHCP configuration
 cat /etc/dhcp/dhcpd.conf
 
 # Ensure the interface is correct in configuration
 cat /etc/default/isc-dhcp-server
+
+
 CTFd Platform Issues
 
 CTFd not accessible:
-
 bashCopy# Check container status
 docker ps | grep ctfd
 
@@ -1482,17 +1502,17 @@ docker logs ctfd_ctfd_1
 docker restart ctfd_ctfd_1
 
 CTFd database issues:
-
 bashCopy# Reset CTFd completely (last resort)
 cd ~/rcc-k/ctfd
 docker-compose down
 rm -rf data/*
 docker-compose up -d
 # Then reconfigure the platform
+
+
 Networking Issues
 
 Can't connect to services:
-
 bashCopy# Check if services are running
 docker ps
 
@@ -1503,7 +1523,6 @@ sudo netstat -tulpn | grep [port]
 sudo ufw status
 
 Connection timeouts:
-
 bashCopy# Check network interfaces
 ip addr show
 
@@ -1512,10 +1531,11 @@ ip route
 
 # Test connectivity between networks
 ping -c 3 192.168.1.134
+
+
 Emergency Recovery Procedures
 
 Full environment reset:
-
 bashCopy# Stop all containers
 cd ~/rcc-k/challenges
 docker-compose down
@@ -1554,7 +1574,7 @@ Reconfigure networking if necessary
 
 Administrator Quick Reference
 Important Commands
-Copy# Check system status
+bashCopy# Check system status
 docker ps -a                  # List all containers
 docker-compose ps             # Check service status
 sudo systemctl status isc-dhcp-server  # Check DHCP server
@@ -1608,10 +1628,3 @@ Docker Compose Files:
 ~/rcc-k/challenges/docker-compose.yml
 ~/rcc-k/ctfd/docker-compose.yml
 ~/rcc-k/story-portal/docker-compose.yml
-
-
-
-
-
-
-This comprehensive deployment guide provides step-by-step instructions for setting up the complete RCC-K Guardians Gauntlet CTF environment, from hardware configuration to running the event. By following these instructions carefully, administrators with minimal technical background can successfully deploy and manage the CTF environment.
